@@ -1,0 +1,284 @@
+# Welfare Benefit Pattern Mining & Youth Support Region Prediction
+
+> Association Rule Mining and Logistic Regression applied to Australia's DSS SA2 Demographics Dataset using R
+
+---
+
+## Overview
+
+This project applies data mining techniques to the **Department of Social Services (DSS) Payment Demographics** dataset to:
+
+- Discover hidden co-occurrence patterns among welfare benefit types across Australian SA2 regions
+- Predict regions with high Youth Allowance (student and apprentice) recipients using Logistic Regression
+
+The study leverages R programming and a suite of visualization tools to enhance understanding of social service distributions and support data-driven welfare planning in Australia.
+
+---
+
+## Academic Context
+
+| Field | Details |
+|---|---|
+| University | General Sir John Kotelawala Defence University |
+| Faculty | Management, Social Sciences, and Humanities |
+| Department | Department of Languages |
+| Programme | BSc in Applied Data Science Communication |
+| Module | Fundamentals of Data Mining (LB 2114) |
+| Instructor | Dr. Charith Silva |
+| Intake | Intake 41 — Year 2, Semester 3 |
+
+### Group Members
+
+| Student ID | Name |
+|---|---|
+| D/ADC/24/0005 | M.I.P. Dissanayaka |
+| D/ADC/24/0010 | R.B.P.B.M.R.P. Halkewela |
+| D/ADC/24/0042 | R.M.U. Sanjali |
+| D/ADC/24/0043 | K.K.S.R. Senadeera |
+
+---
+
+## Dataset
+
+**Source:** [DSS Payments by Statistical Area 2 — Australian Government Open Data](https://data.gov.au/dataset/ds-dga-7a6cd81c-e834-4a0c-8d41-4aec150f958b)
+
+**File:** `dss-demographics-2021-sa2-december-2024.csv`
+
+| Property | Details |
+|---|---|
+| Rows | ~17,178 |
+| Columns | 24 |
+| Geographic Unit | Statistical Area Level 2 (SA2) |
+| Snapshot Period | December 2024 |
+| Benefit Types | 21 (Age Pension, Youth Allowance, JobSeeker, DSP, etc.) |
+
+> **Note:** From December 2022, all values from 1 to 7 are rounded to 5 to protect individual privacy. Zero cells are actual zeros.
+
+---
+
+## Research Questions
+
+1. What significant patterns of benefit co-occurrence exist among Australian SA2 regions?
+2. Can we accurately predict regions with high Youth Allowance (student and apprentice) recipients based on patterns in other welfare payments?
+
+---
+
+## Methodology
+
+### Part 1 — Association Rule Mining (ARM)
+
+The **Apriori algorithm** was applied to identify frequent itemsets and generate association rules from binarised welfare payment data.
+
+**Key parameters used:**
+- `minlen = 2`, `maxlen = 3`
+- `conf = 0.95`
+- `support = 0.1`
+
+**Visualizations produced:**
+- Stacked and side-by-side bar plots of benefit distributions
+- Scatter plot of rules (support vs confidence, colored by lift)
+- Grouped matrix plot
+- Interactive network graph (`htmlwidget`)
+- Interactive rule explorer (`ruleExplorer()`)
+
+---
+
+### Part 2 — Logistic Regression
+
+A **binary classification model** was built to predict whether a region has a high number of JobSeeker Payment recipients.
+
+**Steps:**
+1. Binary target variable created using the median JobSeeker Payment as threshold
+2. Dataset split: 70% training / 30% test (`set.seed(123)`)
+3. Logistic regression fitted using `glm()` with `family = "binomial"`
+4. Data leakage identified and corrected in a revised model
+5. Model evaluated on training and test sets
+
+**Predictors used in the final model:**
+- Age Pension
+- Carer Payment
+- Austudy
+- Disability Support Pension
+- Parenting Payment Single
+- Youth Allowance (student and apprentice)
+- Family Tax Benefit A & B
+
+---
+
+## Key Results
+
+### Association Rule Mining
+
+| Rule | Support | Confidence | Lift |
+|---|---|---|---|
+| Youth Allowance → JobSeeker Payment | 0.18 | 0.81 | 1.25 |
+| Carer Payment → Disability Support Pension | 0.16 | 0.85 | 1.35 |
+| Family Tax Benefit B + Parenting Payment Single → Commonwealth Rent Assistance | 0.14 | 0.79 | 1.30 |
+
+### Logistic Regression
+
+| Metric | Value |
+|---|---|
+| Training Accuracy | 93.3% |
+| Test Accuracy | 93.3% |
+| AUC (ROC Curve) | ~0.83 |
+| Pseudo R-squared | ~0.32 |
+| Most Significant Predictor | Youth Allowance (student/apprentice) |
+| Negative Predictor | Age Pension |
+
+---
+
+## Project Structure
+welfare-benefit-pattern-mining-r/
+│
+├── data/
+│   └── dss-demographics-2021-sa2-december-2024.csv   # Raw dataset (not included — download below)
+│
+├── scripts/
+│   ├── 01_data_cleaning.R                             # Data loading, cleaning, transformation
+│   ├── 02_arm_analysis.R                              # Association Rule Mining (Apriori)
+│   ├── 03_logistic_regression.R                       # Logistic Regression model
+│   └── 04_roc_evaluation.R                            # ROC curve and model evaluation
+│
+├── outputs/
+│   ├── figures/                                       # All generated plots
+│   └── model_summary.txt                              # Model performance summary
+│
+├── report/
+│   └── Rathnayaka_report.pdf                          # Full project report
+│
+└── README.md
+
+---
+
+## Installation and Setup
+
+### Prerequisites
+
+- R (version 4.0 or above)
+- RStudio (recommended)
+
+### Install Required Packages
+```r
+install.packages(c(
+  "arules",
+  "arulesViz",
+  "tidyverse",
+  "ggplot2",
+  "dplyr",
+  "corrplot",
+  "GGally",
+  "readr",
+  "janitor",
+  "pROC"
+))
+```
+
+### Download the Dataset
+
+Download the dataset from the Australian Government Open Data portal:
+
+[https://data.gov.au/dataset/ds-dga-7a6cd81c-e834-4a0c-8d41-4aec150f958b](https://data.gov.au/dataset/ds-dga-7a6cd81c-e834-4a0c-8d41-4aec150f958b)
+
+Save the file as `dss-demographics-2021-sa2-december-2024.csv` inside the `data/` folder.
+
+### Run the Analysis
+```r
+# Step 1: Data cleaning
+source("scripts/01_data_cleaning.R")
+
+# Step 2: Association Rule Mining
+source("scripts/02_arm_analysis.R")
+
+# Step 3: Logistic Regression
+source("scripts/03_logistic_regression.R")
+
+# Step 4: ROC evaluation
+source("scripts/04_roc_evaluation.R")
+```
+
+---
+
+## Sample Code
+
+### Association Rule Mining
+```r
+library(arules)
+library(arulesViz)
+
+# Binarise benefit columns
+df_arm <- as.data.frame(lapply(df_clean[, 4:24], function(x) {
+  as.factor(ifelse(x > 0, "Yes", "No"))
+}))
+
+trans <- as(df_arm, "transactions")
+
+# Generate rules
+rules <- apriori(trans, parameter = list(supp = 0.02, conf = 0.8, minlen = 2))
+inspect(head(sort(rules, by = "lift"), 10))
+
+# Visualise
+plot(rules, method = "graph", engine = "htmlwidget")
+```
+
+### Logistic Regression
+```r
+# Create binary target
+median_js <- median(house_numeric$JobSeeker.Payment, na.rm = TRUE)
+house_full$high_jobseeker <- as.factor(ifelse(
+  house_full$JobSeeker.Payment > median_js, 1, 0
+))
+
+# Train/test split
+set.seed(123)
+pd <- sample(2, nrow(house_full), replace = TRUE, prob = c(0.7, 0.3))
+train <- house_full[pd == 1, ]
+test  <- house_full[pd == 2, ]
+
+# Fit model
+model <- glm(high_jobseeker ~ ., data = train, family = "binomial")
+summary(model)
+
+# Evaluate
+test_pred <- ifelse(predict(model, newdata = test, type = "response") > 0.5, 1, 0)
+test_tab  <- table(predicted = test_pred, actual = test$high_jobseeker)
+cat("Test Accuracy:", sum(diag(test_tab)) / sum(test_tab))
+```
+
+---
+
+## Visualizations
+
+The project produces the following visualizations:
+
+- Distribution of Benefits Received (stacked and side-by-side bar plots)
+- Scatter plot of association rules (support vs confidence vs lift)
+- Grouped matrix plot of rules
+- Interactive network graph of rules
+- Correlation matrix (corrogram)
+- JobSeeker Payment vs Age Pension scatter plot with regression line
+- Residual plots (simple and multiple linear regression)
+- Logistic Regression coefficient bar chart
+- ROC curve
+- Predicted vs Actual grouped bar chart (test set)
+
+---
+
+## References
+
+- Agrawal, R., & Srikant, R. (1994). Fast algorithms for mining association rules. *Proceedings of the 20th VLDB Conference.*
+- Hosmer, D. W., Lemeshow, S., & Sturdivant, R. X. (2013). *Applied Logistic Regression.* Wiley.
+- R Core Team. (2024). *R: A language and environment for statistical computing.* R Foundation.
+- Department of Social Services. (2024). *DSS Demographics 2021.* Australian Government. Retrieved from https://data.gov.au/dataset/ds-dga-7a6cd81c-e834-4a0c-8d41-4aec150f958b
+
+---
+
+## License
+
+This project is submitted as an academic assignment. All code is available for educational reference. The dataset belongs to the Australian Department of Social Services and is subject to their terms of use.
+
+---
+
+## Acknowledgements
+
+We sincerely thank **Dr. Charith Silva** for his guidance and support throughout this project.
