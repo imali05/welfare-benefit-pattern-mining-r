@@ -1,0 +1,177 @@
+---
+title: "Association Rule Mining on DSS Demographics"
+author: "_BI Innovators_ADSC41_"
+date: "2025-04-22"
+output: html_document
+---
+
+
+#Install packages
+```{r}
+library(arules)
+library(arulesViz)
+library(tidyverse)
+```
+
+
+#Read the data file  
+```{r}
+data_path <- "C:/Users/singhagiri/OneDrive/Desktop/assignment 2/dss-demographics-2021-sa2-december-2024.csv"
+demo_data <- read.csv(data_path, header = TRUE, stringsAsFactors = TRUE)
+
+```
+
+
+#Inspect the dataset in R 
+#Once the file has been imported to R, we often want to do few things to explore the dataset: 
+```{r}
+str(demo_data)
+```
+
+```{r}
+summary(demo_data)
+```
+
+```{r}
+names(demo_data)
+head(demo_data)
+tail(demo_data)
+```
+
+
+#Check the dimension 
+```{r}
+dim(demo_data)
+```
+
+#check column names
+```{r}
+colnames(demo_data)
+
+```
+
+
+#Plot and explore the  “demo_data” dataset  with barplot() function  
+```{r}
+# Load required packages
+library(tidyverse)
+
+# Load the dataset
+data <- read.csv("C:/Users/singhagiri/OneDrive/Desktop/assignment 2/dss-demographics-2021-sa2-december-2024.csv", stringsAsFactors = FALSE)
+
+# View column names (for reference)
+colnames(data)
+
+# Step 1: Select only benefit columns (columns 4 to 24 based on your list)
+benefits_data <- data[, 4:24]
+
+# Step 2: Convert numeric values to "Yes"/"No" (Yes if benefit count > 0)
+marketbasket <- as.data.frame(lapply(benefits_data, function(x) ifelse(x > 0, "Yes", "No")))
+
+# Step 3: Use colSums to count Yes and No for each benefit
+yes <- colSums(marketbasket == "Yes")
+no  <- colSums(marketbasket == "No")
+
+# Step 4: Combine into a matrix for plotting
+purchased <- rbind(Yes = as.numeric(yes), No = as.numeric(no))
+colnames(purchased) <- names(yes)
+
+# Step 5: Plot 1 - Stacked Barplot
+barplot(purchased,
+        legend = rownames(purchased),
+        main = "Distribution of Benefits Received (Stacked)",
+        col = c("skyblue", "salmon"),
+        las = 2,              # Rotate x labels
+        cex.names = 0.7)      # Adjust label size
+
+# Step 6: Plot 2 - Side-by-Side Barplot
+barplot(purchased,
+        beside = TRUE,
+        legend = rownames(purchased),
+        main = "Distribution of Benefits Received (Side-by-Side)",
+        col = c("skyblue", "salmon"),
+        las = 2,
+        cex.names = 0.7)
+
+```
+
+#create Association rules .  
+#Usage of apriori () function 
+```{r}
+rules <- apriori(demo_data)
+```
+
+
+#Get the summary of these rules  
+```{r}
+summary(rules) 
+```
+
+
+
+#To inspect the rules please use the following line of code:  
+#Since there are too many rules we need to reduce them into smaller number of rules hence 
+we have to specify the parameters using the following code:  
+#Complete R Code Using Your Dataset and Specified Apriori Parameters
+
+```{r}
+#Apply Apriori algorithm with your specified parameters
+rules <- apriori(demo_data,
+                 parameter = list(minlen = 2,
+                                  maxlen = 3,
+                                  conf = 0.95))
+
+# Step 6: View summary and top 10 rules
+summary(rules)
+inspect(sort(rules, by = "confidence")[1:10])
+```
+
+
+#To Visualize these rules we can use a package called “arulesViz”  
+# Plot the rules. 
+
+```{r}
+install.packages(arulesViz)  
+library(arulesViz)   
+plot(rules)  
+```
+
+#Plot the rules in groups:
+```{r}
+plot(rules, method="grouped") 
+```
+
+#Below code displays a scatterplot matrix to compare the support, confidence, and lift 
+```{r}
+plot(rules@quality)  
+```
+
+
+
+```{r}
+# Visualize rules as a graph
+plot(rules, method = "graph", engine = "htmlwidget")
+
+# Optional: matrix or grouped visual
+plot(rules, method = "grouped")
+
+```
+
+
+#ruleExplorer() function. 
+```{r}
+rules_ex <-apriori(demo_data,  
+parameter =list(minlen=2,maxlen=4,conf=0.75))
+```
+
+```{r}
+ruleExplorer(rules_ex)  
+```
+
+```{r}
+ruleExplorer(demo_data)  
+```
+
+
+
+
